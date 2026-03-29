@@ -1,0 +1,7 @@
+{
+  "name": "Class-Quiz Portal",
+  "description": "An AI-powered MCQ examination platform that automates quiz creation from study notes and manages the entire examination lifecycle for students and admins.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
