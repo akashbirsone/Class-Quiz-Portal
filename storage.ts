@@ -176,6 +176,13 @@ export const Storage = {
     }
   },
   
+  deleteUser: async (userId: string) => {
+    await supabase.from('users').delete().eq('id', userId);
+    // Also clean up related data if necessary
+    await supabase.from('attempts').delete().eq('student_id', userId);
+    await supabase.from('violations').delete().eq('student_id', userId);
+  },
+
   unblockUser: async (userId: string) => {
     await supabase.from('users').update({
       is_blocked: false,

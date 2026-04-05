@@ -23,6 +23,9 @@ const StudentDirectoryPage: React.FC = () => {
   const [selectedViolationStudent, setSelectedViolationStudent] = useState<User | null>(null);
   const [selectedAttempt, setSelectedAttempt] = useState<Attempt | null>(null);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
+  const [editingStudent, setEditingStudent] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({ academicYear: '', semester: '' });
+  const [submissionYearFilter, setSubmissionYearFilter] = useState('All Years');
 
   useEffect(() => {
     const loadData = async () => {
@@ -59,6 +62,28 @@ const StudentDirectoryPage: React.FC = () => {
     if (quiz) {
       ReportService.generateStudentReport(student, quiz, attempt);
     }
+  };
+
+  const startEditing = (student: User) => {
+    setEditingStudent(student);
+    setEditForm({
+      academicYear: student.academicYear || '1st Year',
+      semester: student.semester || 'Semester 1'
+    });
+  };
+
+  const handleUpdateStudent = async () => {
+    if (!editingStudent) return;
+    
+    const updatedUser = {
+      ...editingStudent,
+      academicYear: editForm.academicYear,
+      semester: editForm.semester
+    };
+
+    await Storage.saveUser(updatedUser);
+    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    setEditingStudent(null);
   };
 
   return (
@@ -222,13 +247,22 @@ const StudentDirectoryPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <button
-                          onClick={() => setSelectedStudent(student)}
-                          className="p-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                          title="View Submissions"
-                        >
-                          <History className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => startEditing(student)}
+                            className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                            title="Edit Year/Semester"
+                          >
+                            <GraduationCap className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => setSelectedStudent(student)}
+                            className="p-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                            title="View Submissions"
+                          >
+                            <History className="w-5 h-5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -264,8 +298,30 @@ const StudentDirectoryPage: React.FC = () => {
                 </button>
               </div>
               
+              <div className="p-8 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex items-center space-x-3">
+                  <BookOpen className="w-5 h-5 text-indigo-600" />
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Academic Year Filter:</p>
+                </div>
+                <select 
+                  value={submissionYearFilter}
+                  onChange={(e) => setSubmissionYearFilter(e.target.value)}
+                  className="bg-white px-4 py-2 rounded-xl border border-slate-200 text-xs font-black text-indigo-600 focus:ring-0 outline-none cursor-pointer shadow-sm"
+                >
+                  <option value="All Years">All Academic Years</option>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                </select>
+              </div>
+              
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                {attempts.filter(a => a.studentId === selectedStudent.id).length === 0 ? (
+                {attempts.filter(a => {
+                  if (submissionYearFilter === 'All Years') return a.studentId === selectedStudent.id;
+                  const quiz = quizzes.find(q => q.id === a.quizId);
+                  return a.studentId === selectedStudent.id && quiz?.academicYear === submissionYearFilter;
+                }).length === 0 ? (
                   <div className="py-20 text-center opacity-40">
                     <History className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                     <p className="font-black text-xs uppercase tracking-widest">No Submissions Found</p>
@@ -273,7 +329,11 @@ const StudentDirectoryPage: React.FC = () => {
                 ) : (
                   <div className="space-y-4">
                     {attempts
-                      .filter(a => a.studentId === selectedStudent.id)
+                      .filter(a => {
+                        if (submissionYearFilter === 'All Years') return a.studentId === selectedStudent.id;
+                        const quiz = quizzes.find(q => q.id === a.quizId);
+                        return a.studentId === selectedStudent.id && quiz?.academicYear === submissionYearFilter;
+                      })
                       .sort((a, b) => b.timestamp - a.timestamp)
                       .map(attempt => {
                         const quiz = quizzes.find(q => q.id === attempt.quizId);
@@ -374,7 +434,67 @@ const StudentDirectoryPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Attempt Review Modal */}
+      {/* Edit Student Modal */}
+      <AnimatePresence>
+        {editingStudent && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-[40px] p-10 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-2xl font-black text-slate-900 mb-2">Update Academic Year</h3>
+              <p className="text-slate-500 mb-8 font-medium">Update Year and Semester for {editingStudent.name}.</p>
+              
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Academic Year</label>
+                  <select 
+                    value={editForm.academicYear}
+                    onChange={(e) => setEditForm({ ...editForm, academicYear: e.target.value })}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+                  >
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Semester</label>
+                  <select 
+                    value={editForm.semester}
+                    onChange={(e) => setEditForm({ ...editForm, semester: e.target.value })}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+                  >
+                    {[1,2,3,4,5,6,7,8].map(s => (
+                      <option key={s} value={`Semester ${s}`}>Semester {s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    onClick={() => setEditingStudent(null)}
+                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-200 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUpdateStudent}
+                    className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all"
+                  >
+                    Update
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {selectedAttempt && selectedQuiz && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[120] flex items-center justify-center p-4">

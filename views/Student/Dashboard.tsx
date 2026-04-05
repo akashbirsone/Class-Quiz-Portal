@@ -39,8 +39,11 @@ const StudentDashboard: React.FC = () => {
   const [violations, setViolations] = useState<Violation[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [rank, setRank] = useState<number | string>('N/A');
+  const [percentile, setPercentile] = useState<number>(0);
   const [selectedAttempt, setSelectedAttempt] = useState<Attempt | null>(null);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
+  const [historyYearFilter, setHistoryYearFilter] = useState<string>('All Years');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -87,6 +90,16 @@ const StudentDashboard: React.FC = () => {
           };
         }).sort((a, b) => b.score - a.score);
         setLeaderboard(entries);
+
+        const currentRank = entries.findIndex(e => e.studentEmail === currentUser.email) + 1;
+        setRank(currentRank > 0 ? currentRank : 'N/A');
+        
+        if (entries.length > 1 && currentRank > 0) {
+          const perc = Math.round(((entries.length - currentRank) / (entries.length - 1)) * 100);
+          setPercentile(perc);
+        } else if (entries.length === 1 && currentRank === 1) {
+          setPercentile(100);
+        }
       }
     };
     fetchDashboardData();
@@ -107,7 +120,9 @@ const StudentDashboard: React.FC = () => {
     pending: quizzes.filter(q => !getAttemptForQuiz(q.id)).length,
     avgScore: attempts.length > 0 
       ? (attempts.reduce((acc, curr) => acc + (curr.score / curr.totalQuestions), 0) / attempts.length * 100).toFixed(0)
-      : 0
+      : 0,
+    rank: rank,
+    percentile: percentile
   };
 
   return (
@@ -176,9 +191,9 @@ const StudentDashboard: React.FC = () => {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Completed', value: `${stats.completed} Exams`, icon: <CheckCircle2 className="w-5 h-5" />, color: 'indigo' },
-          { label: 'Pending', value: `${stats.pending} Tasks`, icon: <Clock className="w-5 h-5" />, color: 'slate' },
-          { label: 'Performance', value: `${stats.avgScore}% Avg`, icon: <Trophy className="w-5 h-5" />, color: 'blue' }
+          { label: 'Exams Taken', value: `${stats.completed}`, icon: <CheckCircle2 className="w-5 h-5" />, color: 'indigo' },
+          { label: 'Current Rank', value: stats.rank === 'N/A' ? 'Pending' : `#${stats.rank}`, icon: <Trophy className="w-5 h-5" />, color: 'blue' },
+          { label: 'Performance', value: stats.completed > 0 ? `Top ${100 - stats.percentile}%` : 'No Data', icon: <ArrowRight className="w-5 h-5" />, color: 'emerald' }
         ].map((stat, i) => (
           <div key={i} className="glass-card p-5 md:p-6 shadow-sm border-white/50 flex items-center space-x-4 md:space-x-5">
             <div className={`p-3 md:p-4 rounded-2xl bg-${stat.color}-50 text-${stat.color}-600`}>
@@ -293,13 +308,42 @@ const StudentDashboard: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             className="space-y-4"
           >
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+              <div className="flex items-center space-x-3">
+                <History className="w-6 h-6 text-indigo-600" />
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Performance History</h3>
+              </div>
+              
+              <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Year Filter:</span>
+                <select 
+                  value={historyYearFilter}
+                  onChange={(e) => setHistoryYearFilter(e.target.value)}
+                  className="bg-transparent border-none text-xs font-black text-indigo-600 focus:ring-0 outline-none cursor-pointer"
+                >
+                  <option value="All Years">All Academic Years</option>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                </select>
+              </div>
+            </div>
+
             {attempts.length === 0 ? (
               <div className="py-20 glass-card flex flex-col items-center text-center opacity-60">
                 <History className="w-12 h-12 text-slate-300 mb-4" />
                 <p className="text-slate-500 font-bold">No examination history found.</p>
               </div>
             ) : (
-              attempts.sort((a,b) => b.timestamp - a.timestamp).map(attempt => {
+              attempts
+                .filter(a => {
+                  if (historyYearFilter === 'All Years') return true;
+                  const quiz = allQuizzes.find(q => q.id === a.quizId);
+                  return quiz?.academicYear === historyYearFilter;
+                })
+                .sort((a,b) => b.timestamp - a.timestamp)
+                .map(attempt => {
                 const quiz = allQuizzes.find(q => q.id === attempt.quizId);
                 return (
                   <div key={attempt.id} className="glass-card p-6 shadow-sm border-white/60 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-indigo-50/30 transition-colors">
@@ -371,7 +415,7 @@ const StudentDashboard: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-xl md:text-2xl font-black text-indigo-600">{entry.score}%</p>
-                      <p className="text-[9px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest">Global Rank</p>
+                      <p className="text-[9px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest">Class Rank</p>
                     </div>
                   </div>
                 ))}

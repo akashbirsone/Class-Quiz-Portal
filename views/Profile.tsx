@@ -16,12 +16,13 @@ const Profile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const currentUser = Storage.getCurrentUser();
-  
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [violations, setViolations] = useState<Violation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rank, setRank] = useState<number | string>('N/A');
+  const [percentile, setPercentile] = useState<number | string>('N/A');
 
   // Modal states
   const [selectedAttempt, setSelectedAttempt] = useState<Attempt | null>(null);
@@ -46,13 +47,39 @@ const Profile: React.FC = () => {
         // Load student specific data if the profile is for a student
         if (user.role === 'student') {
           const allAttempts = await Storage.getAttempts();
-          setAttempts(allAttempts.filter(a => a.studentId === targetId));
+          const userAttempts = allAttempts.filter(a => a.studentId === targetId);
+          setAttempts(userAttempts);
           
           const allQuizzes = await Storage.getQuizzes();
           setQuizzes(allQuizzes);
           
           const allViolations = await Storage.getViolations();
           setViolations(allViolations.filter(v => v.studentId === targetId));
+
+          // Calculate Rank
+          const classStudents = allUsers.filter(u => 
+            u.role === 'student' && 
+            u.academicYear === user.academicYear && 
+            u.semester === user.semester
+          );
+
+          const leaderboard = classStudents.map(u => {
+            const uAttempts = allAttempts.filter(a => a.studentId === u.id);
+            const avg = uAttempts.length > 0 
+              ? uAttempts.reduce((acc, a) => acc + (a.score / a.totalQuestions), 0) / uAttempts.length * 100
+              : 0;
+            return { id: u.id, avg };
+          }).sort((a, b) => b.avg - a.avg);
+
+          const currentRank = leaderboard.findIndex(s => s.id === targetId) + 1;
+          setRank(currentRank > 0 ? currentRank : 'N/A');
+          
+          if (leaderboard.length > 1) {
+            const perc = Math.round(((leaderboard.length - currentRank) / (leaderboard.length - 1)) * 100);
+            setPercentile(perc);
+          } else {
+            setPercentile(100);
+          }
         }
       }
       setLoading(false);
@@ -88,7 +115,7 @@ const Profile: React.FC = () => {
       : '0',
     totalExams: attempts.length,
     violationsCount: violations.length,
-    rank: 'N/A' // Could be calculated if needed
+    rank: rank
   };
 
   const openAttemptReview = (attempt: Attempt) => {
@@ -281,7 +308,7 @@ const Profile: React.FC = () => {
                   </h3>
                   <div className="flex items-center space-x-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl border border-emerald-100">
                     <Award className="w-4 h-4" />
-                    <span className="text-xs font-black uppercase tracking-widest">Top 15%</span>
+                    <span className="text-xs font-black uppercase tracking-widest">{percentile > 0 ? `Top ${100-percentile}%` : 'Rank Pending'}</span>
                   </div>
                 </div>
 
@@ -315,8 +342,8 @@ const Profile: React.FC = () => {
                       </div>
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Consistency</span>
                     </div>
-                    <p className="text-3xl font-black text-emerald-600">94%</p>
-                    <p className="text-xs text-slate-500 font-medium mt-1">Attendance rate</p>
+                    <p className="text-3xl font-black text-emerald-600">#{rank}</p>
+                    <p className="text-xs text-slate-500 font-medium mt-1">Current Class Rank</p>
                   </div>
                 </div>
               </motion.div>

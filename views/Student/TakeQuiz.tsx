@@ -38,6 +38,16 @@ const TakeQuiz: React.FC = () => {
       const allQuizzes = await Storage.getQuizzes();
       const q = allQuizzes.find(item => item.id === id);
       if (q) {
+        // Check if student already attempted this quiz
+        const allAttempts = await Storage.getAttempts();
+        const existingAttempt = allAttempts.find(a => a.studentId === user.id && a.quizId === id);
+        
+        if (existingAttempt) {
+          alert('You have already completed this assessment.');
+          navigate('/student');
+          return;
+        }
+
         setQuiz(q);
         setTimeLeft(q.durationMinutes * 60);
       }
