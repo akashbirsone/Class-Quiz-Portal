@@ -239,7 +239,7 @@ const CreateQuiz: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
-  const [activeInputTab, setActiveInputTab] = useState<'manual' | 'text' | 'document' | 'image'>('manual');
+  const [activeInputTab, setActiveInputTab] = useState<'text' | 'document' | 'image'>('text');
   
   const [quizConfig, setQuizConfig] = useState({
     title: '',
@@ -301,27 +301,6 @@ const CreateQuiz: React.FC = () => {
   };
 
   const handleGenerate = async () => {
-    if (activeInputTab === 'manual') {
-      if (!quizConfig.title.trim()) {
-        alert("Please enter an examination title.");
-        return;
-      }
-      if (generatedQuestions.length === 0) {
-        alert("Please add at least one question.");
-        return;
-      }
-      
-      const invalidQuestion = generatedQuestions.find(q => !q.text.trim() || q.options.some(o => !o.trim()));
-      if (invalidQuestion) {
-        alert("Please fill in all question texts and options.");
-        return;
-      }
-
-      setStep(2);
-      setExpandedQuestions(new Set(generatedQuestions.slice(0, 3).map(q => q.id)));
-      return;
-    }
-
     const parts: ContentPart[] = [];
     if (quizConfig.sourceText.trim()) parts.push({ text: quizConfig.sourceText });
     images.forEach(img => {
@@ -358,7 +337,10 @@ const CreateQuiz: React.FC = () => {
       const qs = await GeminiService.generateQuestions(
         parts,
         quizConfig.questionCount,
-        quizConfig.difficulty
+        quizConfig.difficulty,
+        (current, total) => {
+          setStatus(`Generating question ${current} of ${total}...`);
+        }
       );
       
       if (!qs || qs.length === 0) {
@@ -482,7 +464,6 @@ const CreateQuiz: React.FC = () => {
                 <div className="w-full max-w-[600px] glass-card shadow-2xl border-white/60 overflow-hidden flex flex-col">
                   <div className="flex bg-slate-100/50 border-b border-slate-200/50 overflow-x-auto custom-scrollbar">
                     {[
-                      { id: 'manual', label: 'Manual Entry', icon: <PlusCircle className="w-4 h-4" /> },
                       { id: 'text', label: 'Manual Text', icon: <TypeIcon className="w-4 h-4" /> },
                       { id: 'document', label: 'PDF / DOCS', icon: <FileText className="w-4 h-4" /> },
                       { id: 'image', label: 'Upload Photo', icon: <Camera className="w-4 h-4" /> }
@@ -503,105 +484,6 @@ const CreateQuiz: React.FC = () => {
 
                   <div className="p-8 flex-1 flex flex-col">
                     <AnimatePresence mode="wait">
-                      {activeInputTab === 'manual' && (
-                        <motion.div
-                          key="tab-manual"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          className="flex flex-col flex-1"
-                        >
-                          <div className="mb-4 flex items-center justify-between">
-                            <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Manual Question Entry</h4>
-                          </div>
-                          <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2 max-h-[400px]">
-                            {generatedQuestions.map((q, idx) => (
-                              <div key={q.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 relative group">
-                                <button onClick={() => setGeneratedQuestions(generatedQuestions.filter(gq => gq.id !== q.id))} className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50">
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                                <div className="mb-3">
-                                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 block">Question {idx + 1}</label>
-                                  <input 
-                                    type="text" 
-                                    value={q.text} 
-                                    onChange={(e) => {
-                                      const newQs = [...generatedQuestions];
-                                      newQs[idx].text = e.target.value;
-                                      setGeneratedQuestions(newQs);
-                                    }}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold"
-                                    placeholder="Enter question text"
-                                  />
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 mb-3">
-                                  {q.options.map((opt, optIdx) => (
-                                    <div key={optIdx} className="flex items-center space-x-2">
-                                      <input 
-                                        type="radio" 
-                                        name={`correct-${q.id}`} 
-                                        checked={q.correctAnswer === optIdx}
-                                        onChange={() => {
-                                          const newQs = [...generatedQuestions];
-                                          newQs[idx].correctAnswer = optIdx;
-                                          setGeneratedQuestions(newQs);
-                                        }}
-                                        className="w-4 h-4 text-indigo-600"
-                                      />
-                                      <input 
-                                        type="text" 
-                                        value={opt}
-                                        onChange={(e) => {
-                                          const newQs = [...generatedQuestions];
-                                          newQs[idx].options[optIdx] = e.target.value;
-                                          setGeneratedQuestions(newQs);
-                                        }}
-                                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold"
-                                        placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                                <div>
-                                  <input 
-                                    type="text" 
-                                    value={q.explanation}
-                                    onChange={(e) => {
-                                      const newQs = [...generatedQuestions];
-                                      newQs[idx].explanation = e.target.value;
-                                      setGeneratedQuestions(newQs);
-                                    }}
-                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-500"
-                                    placeholder="Explanation (Optional)"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                            
-                            <button 
-                              onClick={() => {
-                                if (generatedQuestions.length >= 20) {
-                                  alert("Maximum 20 questions allowed.");
-                                  return;
-                                }
-                                setGeneratedQuestions([...generatedQuestions, {
-                                  id: Math.random().toString(36).substring(2, 9),
-                                  text: '',
-                                  options: ['', '', '', ''],
-                                  correctAnswer: 0,
-                                  difficulty: quizConfig.difficulty,
-                                  explanation: ''
-                                }]);
-                              }}
-                              className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 font-black text-xs uppercase tracking-widest hover:border-indigo-400 hover:text-indigo-600 transition-colors flex items-center justify-center space-x-2"
-                            >
-                              <PlusCircle className="w-4 h-4" />
-                              <span>Add Manual Question</span>
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-
                       {activeInputTab === 'text' && (
                         <motion.div
                           key="tab-text"
