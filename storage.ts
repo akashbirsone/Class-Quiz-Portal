@@ -93,7 +93,7 @@ export const Storage = {
       rollNumber: u.roll_number,
       isBlocked: u.is_blocked,
       blockedUntil: u.blocked_until,
-      warning_count: u.warning_count,
+      warningCount: u.warning_count,
       isArchived: u.is_archived
     })) as User[];
   },

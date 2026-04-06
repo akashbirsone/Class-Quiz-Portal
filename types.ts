@@ -51,6 +51,7 @@ export interface User {
   blockedUntil?: number;
   warningCount?: number;
   isArchived?: boolean;
+  avatarUrl?: string;
 }
 
 export interface Attempt {
