@@ -170,10 +170,17 @@ const ViolationLogsPage: React.FC = () => {
                         <p className="text-xs font-bold text-slate-500">{new Date(v.timestamp).toLocaleString()}</p>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <div className="flex items-center justify-end space-x-1 text-amber-500">
-                          <AlertTriangle className="w-4 h-4" />
-                          <span className="text-[10px] font-black uppercase tracking-widest">Warning</span>
-                        </div>
+                        {student?.isBlocked ? (
+                          <div className="flex items-center justify-end space-x-1 text-red-600">
+                            <ShieldAlert className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-red-600 font-black">Blocked</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end space-x-1 text-amber-500">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Warning</span>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );

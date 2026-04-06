@@ -65,7 +65,7 @@ const AdminDashboard: React.FC = () => {
     avgScore: filteredAttempts.length > 0 
       ? (filteredAttempts.reduce((acc, curr) => acc + (curr.score / curr.totalQuestions), 0) / filteredAttempts.length * 100).toFixed(1)
       : 0,
-    blockedStudents: filteredStudents.filter(u => u.isBlocked).length
+    blockedStudents: users.filter(u => u.isBlocked).length
   };
 
   const handleUnblock = async (userId: string) => {
@@ -135,17 +135,17 @@ const AdminDashboard: React.FC = () => {
       {/* Attempt Review Modal (Nested) */}
       <AnimatePresence>
         {selectedAttempt && selectedQuiz && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[120] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[120] flex items-center justify-center p-2 md:p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[40px] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+              className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
             >
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="p-5 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900">Submission Review</h3>
-                  <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-1">
+                  <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight">Submission Review</h3>
+                  <p className="text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest mt-1">
                     {selectedStudent?.name} • {selectedQuiz.title}
                   </p>
                 </div>
@@ -157,7 +157,7 @@ const AdminDashboard: React.FC = () => {
                 </button>
               </div>
               
-              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-5 md:p-8 custom-scrollbar">
                 <AttemptReview quiz={selectedQuiz} attempt={selectedAttempt} />
               </div>
               
@@ -177,17 +177,17 @@ const AdminDashboard: React.FC = () => {
       {/* Student Submissions Modal */}
       <AnimatePresence>
         {selectedStudent && !selectedAttempt && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-2 md:p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[40px] w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
+              className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-3xl max-h-[90vh] md:max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
             >
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="p-5 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900">Student Submissions</h3>
-                  <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-1">
+                  <h3 className="text-xl md:text-2xl font-black text-slate-900">Student Submissions</h3>
+                  <p className="text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest mt-1">
                     {selectedStudent.name} • {selectedStudent.rollNumber}
                   </p>
                 </div>
@@ -213,24 +213,24 @@ const AdminDashboard: React.FC = () => {
                       .map(attempt => {
                         const quiz = quizzes.find(q => q.id === attempt.quizId);
                         return (
-                          <div key={attempt.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between hover:bg-white hover:border-indigo-100 transition-all group">
+                          <div key={attempt.id} className="p-4 md:p-6 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white hover:border-indigo-100 transition-all group">
                             <div>
-                              <p className="font-black text-slate-900 text-lg">{quiz?.title || 'Unknown Exam'}</p>
-                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                              <p className="font-black text-slate-900 text-base md:text-lg">{quiz?.title || 'Unknown Exam'}</p>
+                              <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
                                 {new Date(attempt.timestamp).toLocaleDateString()} • {attempt.score}/{attempt.totalQuestions} Correct
                               </p>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 w-full md:w-auto">
                               <button 
                                 onClick={() => handleDownloadStudentReport(selectedStudent, attempt)}
-                                className="p-3 bg-white text-emerald-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                                className="flex-1 md:flex-none p-3 bg-white text-emerald-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                                 title="Download Report"
                               >
-                                <Download className="w-4 h-4" />
+                                <Download className="w-4 h-4 mx-auto" />
                               </button>
                               <button 
                                 onClick={() => openAttemptReview(attempt)}
-                                className="px-6 py-3 bg-white text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm"
+                                className="flex-[3] md:flex-none px-6 py-3 bg-white text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm"
                               >
                                 Review
                               </button>
@@ -249,17 +249,17 @@ const AdminDashboard: React.FC = () => {
       {/* Violation Log Modal */}
       <AnimatePresence>
         {viewingStudent && selectedStudentViolations && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-2 md:p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[40px] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
+              className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
             >
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="p-5 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900">Violation History</h3>
-                  <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-1">{viewingStudent.name} • {viewingStudent.rollNumber}</p>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-900">Violation History</h3>
+                  <p className="text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest mt-1">{viewingStudent.name} • {viewingStudent.rollNumber}</p>
                 </div>
                 <button 
                   onClick={() => { setViewingStudent(null); setSelectedStudentViolations(null); }}
@@ -309,12 +309,12 @@ const AdminDashboard: React.FC = () => {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Admin Dashboard</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Admin Dashboard</h1>
         </div>
         <div className="flex items-center space-x-4">
           <Link
             to="/admin/create"
-            className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 transition-all flex items-center space-x-3 active:scale-95 group"
+            className="w-full md:w-auto bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 transition-all flex items-center justify-center space-x-3 active:scale-95 group"
           >
             <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform" />
             <span>New Assessment</span>
@@ -426,6 +426,39 @@ const AdminDashboard: React.FC = () => {
         ))}
       </div>
 
+      {/* Blocked Student List (Conditional) */}
+      {users.filter(u => u.isBlocked).length > 0 && (
+        <motion.div variants={itemVariants} className="glass-card p-6 md:p-10 border-red-100 shadow-2xl shadow-red-100/50">
+          <div className="flex items-center space-x-4 mb-6 md:mb-8">
+            <div className="p-3 md:p-4 bg-red-50 text-red-600 rounded-2xl">
+              <UserX className="w-6 h-6 md:w-8 md:h-8" />
+            </div>
+            <div>
+              <h3 className="text-xl md:text-2xl font-black text-slate-900">Restricted Students</h3>
+              <p className="text-[10px] md:text-sm text-slate-500 font-medium">Currently blocked for violations.</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {users.filter(u => u.isBlocked).map(student => (
+              <div key={student.id} className="p-6 bg-red-50/30 rounded-3xl border border-red-100 flex justify-between items-start group">
+                <div>
+                  <p className="font-black text-slate-900 text-lg">{student.name}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{student.rollNumber}</p>
+                </div>
+                <button
+                  onClick={() => handleUnblock(student.id)}
+                  className="p-3 bg-white text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm border border-emerald-100"
+                  title="Unblock Now"
+                >
+                  <UserCheck className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Quick Actions Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
         <motion.div variants={itemVariants} className="glass-card p-8 border-white/60 shadow-xl flex flex-col justify-between">
@@ -444,7 +477,7 @@ const AdminDashboard: React.FC = () => {
 
         <motion.div variants={itemVariants} className="glass-card p-8 border-white/60 shadow-xl flex flex-col justify-between">
           <div>
-            <h3 className="text-xl font-black text-slate-900 mb-2">Warning Records</h3>
+            <h3 className="text-xl font-black text-slate-900 mb-2">Warning & Block History</h3>
             <p className="text-slate-500 text-sm font-medium mb-6">Comprehensive log of all proctoring violations and system warnings.</p>
           </div>
           <Link 

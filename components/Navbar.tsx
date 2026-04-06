@@ -208,12 +208,24 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                 <DatabaseStatus />
               </div>
               
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-slate-900 leading-none">{user.name}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                  {user.role} {user.academicYear && `• ${user.academicYear}`}
-                </p>
-              </div>
+              <Link 
+                to="/profile" 
+                className="text-right hidden sm:flex items-center space-x-3 p-1.5 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+              >
+                <div className="hidden lg:block text-right">
+                  <p className="text-sm font-black text-slate-900 leading-none">{user.name}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    {user.role} {user.academicYear && `• ${user.academicYear}`}
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 overflow-hidden shadow-sm">
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <UserIcon className="w-6 h-6" />
+                  )}
+                </div>
+              </Link>
               
               <div className="h-8 w-px bg-slate-200 hidden sm:block mx-2"></div>
 
@@ -390,15 +402,23 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                 <div className="mb-6 flex justify-center">
                   <DatabaseStatus />
                 </div>
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400">
-                    <UserIcon className="w-6 h-6" />
+                <Link 
+                  to="/profile" 
+                  onClick={toggleSidebar}
+                  className="flex items-center space-x-3 mb-6 p-2 rounded-2xl hover:bg-white transition-all border border-transparent hover:border-slate-100"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 overflow-hidden shadow-sm">
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-6 h-6" />
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-black text-slate-900 leading-none">{user.name}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{user.role}</p>
                   </div>
-                </div>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center justify-center space-x-2 py-3 bg-red-50 text-red-600 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-colors"

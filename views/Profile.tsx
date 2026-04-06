@@ -30,68 +30,74 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
-      const targetId = id || currentUser?.id;
-      
-      if (!targetId) {
-        navigate('/login');
-        return;
-      }
-
-      const allUsers = await Storage.getUsers();
-      const user = allUsers.find(u => u.id === targetId);
-      
-      if (user) {
-        setProfileUser(user);
+      try {
+        setLoading(true);
+        const targetId = id || currentUser?.id;
         
-        // Load student specific data if the profile is for a student
-        if (user.role === 'student') {
-          const allAttempts = await Storage.getAttempts();
-          const userAttempts = allAttempts.filter(a => a.studentId === targetId);
-          setAttempts(userAttempts);
-          
-          const allQuizzes = await Storage.getQuizzes();
-          setQuizzes(allQuizzes);
-          
-          const allViolations = await Storage.getViolations();
-          setViolations(allViolations.filter(v => v.studentId === targetId));
+        if (!targetId) {
+          navigate('/login');
+          return;
+        }
 
-          // Calculate Rank
-          const classStudents = allUsers.filter(u => 
-            u.role === 'student' && 
-            u.academicYear === user.academicYear && 
-            u.semester === user.semester
-          );
-
-          const leaderboard = classStudents.map(u => {
-            const uAttempts = allAttempts.filter(a => a.studentId === u.id);
-            const avg = uAttempts.length > 0 
-              ? uAttempts.reduce((acc, a) => acc + (a.score / a.totalQuestions), 0) / uAttempts.length * 100
-              : 0;
-            return { id: u.id, avg };
-          }).sort((a, b) => b.avg - a.avg);
-
-          const currentRank = leaderboard.findIndex(s => s.id === targetId) + 1;
-          setRank(currentRank > 0 ? currentRank : 'N/A');
+        const allUsers = await Storage.getUsers();
+        const user = allUsers.find(u => u.id === targetId);
+        
+        if (user) {
+          setProfileUser(user);
           
-          if (leaderboard.length > 1) {
-            const perc = Math.round(((leaderboard.length - currentRank) / (leaderboard.length - 1)) * 100);
-            setPercentile(perc);
-          } else {
-            setPercentile(100);
+          if (user.role === 'student') {
+            const [allAttempts, allQuizzes, allViolations] = await Promise.all([
+              Storage.getAttempts(),
+              Storage.getQuizzes(),
+              Storage.getViolations()
+            ]);
+
+            const userAttempts = allAttempts.filter(a => a.studentId === targetId);
+            setAttempts(userAttempts);
+            setQuizzes(allQuizzes);
+            setViolations(allViolations.filter(v => v.studentId === targetId));
+
+            // Calculate Rank
+            const classStudents = allUsers.filter(u => 
+              u.role === 'student' && 
+              u.academicYear === user.academicYear && 
+              u.semester === user.semester
+            );
+
+            const leaderboard = classStudents.map(u => {
+              const uAttempts = allAttempts.filter(a => a.studentId === u.id);
+              const avg = uAttempts.length > 0 
+                ? uAttempts.reduce((acc, a) => acc + (a.score / a.totalQuestions), 0) / uAttempts.length * 100
+                : 0;
+              return { id: u.id, avg };
+            }).sort((a, b) => b.avg - a.avg);
+
+            const currentRank = leaderboard.findIndex(s => s.id === targetId) + 1;
+            setRank(currentRank > 0 ? currentRank : 'N/A');
+            
+            if (leaderboard.length > 1) {
+              const perc = Math.round(((leaderboard.length - currentRank) / (leaderboard.length - 1)) * 100);
+              setPercentile(perc);
+            } else {
+              setPercentile(100);
+            }
           }
         }
+      } catch (error) {
+        console.error("Failed to load profile data:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadData();
-  }, [id, currentUser, navigate]);
+  }, [id, currentUser?.id, navigate]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
         <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Initializing Data Console...</p>
       </div>
     );
   }
@@ -145,10 +151,10 @@ const Profile: React.FC = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white rounded-[40px] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
             >
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="p-5 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900">Submission Review</h3>
-                  <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-1">
+                  <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight">Submission Review</h3>
+                  <p className="text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest mt-1">
                     {profileUser.name} • {selectedQuiz.title}
                   </p>
                 </div>
@@ -156,11 +162,11 @@ const Profile: React.FC = () => {
                   onClick={() => { setSelectedAttempt(null); setSelectedQuiz(null); }}
                   className="p-3 hover:bg-white rounded-2xl text-slate-400 hover:text-slate-900 transition-all shadow-sm"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
               </div>
               
-              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-5 md:p-8 custom-scrollbar">
                 <AttemptReview quiz={selectedQuiz} attempt={selectedAttempt} />
               </div>
               
@@ -181,9 +187,9 @@ const Profile: React.FC = () => {
         <div className="flex items-center space-x-6">
           <button 
             onClick={() => navigate(-1)}
-            className="p-3 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm group"
+            className="p-2.5 md:p-3 bg-white rounded-2xl border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm group"
           >
-            <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" />
           </button>
           <div>
             <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
@@ -214,14 +220,22 @@ const Profile: React.FC = () => {
             <div className="h-32 bg-gradient-to-br from-indigo-600 to-violet-700 relative">
               <div className="absolute -bottom-12 left-8">
                 <div className="w-24 h-24 rounded-3xl bg-white p-1.5 shadow-xl">
-                  <div className="w-full h-full bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-600">
-                    <UserIcon className="w-12 h-12" />
-                  </div>
+                  {profileUser.avatarUrl ? (
+                    <img 
+                      src={profileUser.avatarUrl} 
+                      alt={profileUser.name}
+                      className="w-full h-full rounded-2xl object-cover shadow-inner"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-600 text-3xl font-black">
+                      {profileUser.name.charAt(0)}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             
-            <div className="pt-16 pb-8 px-8 space-y-6">
+            <div className="pt-14 pb-6 md:pt-16 md:pb-8 px-5 md:px-8 space-y-6">
               <div>
                 <h2 className="text-2xl font-black text-slate-900">{profileUser.name}</h2>
                 <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">{profileUser.role}</p>
@@ -299,7 +313,7 @@ const Profile: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="glass-card p-8 border-white/60 shadow-2xl"
+                className="glass-card p-6 md:p-8 border-white/60 shadow-2xl"
               >
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center space-x-3">
@@ -312,8 +326,8 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  <div className="p-5 md:p-6 bg-slate-50 rounded-[24px] md:rounded-3xl border border-slate-100">
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-2 bg-white rounded-xl shadow-sm text-indigo-600">
                         <History className="w-5 h-5" />
@@ -355,9 +369,9 @@ const Profile: React.FC = () => {
                 transition={{ delay: 0.1 }}
                 className="glass-card border-white/60 shadow-2xl overflow-hidden"
               >
-                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center space-x-3">
-                    <Calendar className="w-6 h-6 text-indigo-600" />
+                <div className="px-5 md:px-8 py-5 md:py-6 border-b border-slate-100 flex justify-between items-center">
+                  <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight flex items-center space-x-3">
+                    <Calendar className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
                     <span>Exam History</span>
                   </h3>
                   <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">
@@ -376,42 +390,42 @@ const Profile: React.FC = () => {
                       const quiz = quizzes.find(q => q.id === attempt.quizId);
                       const scorePercent = Math.round((attempt.score / attempt.totalQuestions) * 100);
                       return (
-                        <div key={attempt.id} className="p-8 hover:bg-slate-50/50 transition-all group flex flex-col md:flex-row md:items-center justify-between gap-6">
-                          <div className="flex items-center space-x-6">
-                            <div className={`w-16 h-16 rounded-3xl flex flex-col items-center justify-center shadow-inner ${
+                        <div key={attempt.id} className="p-5 md:p-8 hover:bg-slate-50/50 transition-all group flex flex-col md:flex-row md:items-center justify-between gap-5 md:gap-6">
+                          <div className="flex items-center space-x-4 md:space-x-6">
+                            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center shadow-inner shrink-0 ${
                               scorePercent >= 80 ? 'bg-emerald-50 text-emerald-600' : 
                               scorePercent >= 50 ? 'bg-indigo-50 text-indigo-600' : 
                               'bg-amber-50 text-amber-600'
                             }`}>
-                              <span className="text-xl font-black leading-none">{scorePercent}%</span>
-                              <span className="text-[8px] font-black uppercase tracking-widest mt-1">Score</span>
+                              <span className="text-base md:text-xl font-black leading-none">{scorePercent}%</span>
+                              <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest mt-1">Score</span>
                             </div>
-                            <div>
-                              <h4 className="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{quiz?.title || 'Unknown Exam'}</h4>
-                              <div className="flex items-center space-x-4 mt-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center">
+                            <div className="min-w-0">
+                              <h4 className="text-base md:text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{quiz?.title || 'Unknown Exam'}</h4>
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                                <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center">
                                   <Clock className="w-3 h-3 mr-1" />
                                   {new Date(attempt.timestamp).toLocaleDateString()}
                                 </span>
-                                <div className="w-1 h-1 rounded-full bg-slate-300" />
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-300" />
+                                <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                   {attempt.score}/{attempt.totalQuestions} Correct
                                 </span>
                               </div>
                             </div>
                           </div>
                           
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 md:space-x-3 w-full md:w-auto">
                             <button 
                               onClick={() => handleDownloadReport(attempt)}
-                              className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-100 rounded-2xl transition-all shadow-sm"
+                              className="flex-1 md:flex-none p-2.5 md:p-3 bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-100 rounded-xl md:rounded-2xl transition-all shadow-sm flex items-center justify-center"
                               title="Download Report"
                             >
-                              <Download className="w-5 h-5" />
+                              <Download className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
                             <button 
                               onClick={() => openAttemptReview(attempt)}
-                              className="px-6 py-3 bg-white border border-slate-200 text-slate-900 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-sm"
+                              className="flex-[3] md:flex-none px-4 md:px-6 py-2.5 md:py-3 bg-white border border-slate-200 text-slate-900 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-sm"
                             >
                               Review
                             </button>

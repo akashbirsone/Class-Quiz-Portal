@@ -237,14 +237,14 @@ const TakeQuiz: React.FC = () => {
               <CheckCircle2 className="w-12 h-12 text-green-500" />
             </div>
           </div>
-          <h2 className="text-4xl font-black text-slate-900 mb-2">Quiz Completed!</h2>
-          <p className="text-slate-500 font-medium mb-10">Your response has been securely recorded.</p>
+          <h2 className="text-2xl md:text-4xl font-black text-slate-900 mb-2">Quiz Completed!</h2>
+          <p className="text-sm md:text-slate-500 font-medium mb-10">Your response has been securely recorded.</p>
           
-          <div className="bg-slate-50/80 backdrop-blur-sm p-10 rounded-[32px] mb-10 border border-slate-100 shadow-inner">
+          <div className="bg-slate-50/80 backdrop-blur-sm p-6 md:p-10 rounded-[32px] mb-10 border border-slate-100 shadow-inner">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Final Score</p>
-            <h3 className="text-7xl font-black text-indigo-600 mb-4">{percent}%</h3>
+            <h3 className="text-5xl md:text-7xl font-black text-indigo-600 mb-4">{percent}%</h3>
             <div className="flex justify-center space-x-2">
-              <span className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-widest">
+              <span className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest">
                 {score} / {quiz.questions.length} Points
               </span>
             </div>
@@ -327,10 +327,10 @@ const TakeQuiz: React.FC = () => {
       </AnimatePresence>
 
       {/* Distraction-Free Header */}
-      <div className="sticky top-2 z-40 mb-10">
-        <div className="glass-card px-8 py-5 shadow-xl border-white/60 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative w-16 h-12 bg-slate-900 rounded-xl overflow-hidden border-2 border-indigo-500 shadow-lg">
+      <div className="sticky top-0 z-40 mb-6 -mx-4">
+        <div className="glass-card px-4 md:px-8 py-3 md:py-5 shadow-xl border-white/60 flex items-center justify-between rounded-none md:rounded-[32px]">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="relative w-12 h-9 md:w-16 md:h-12 bg-slate-900 rounded-lg md:rounded-xl overflow-hidden border-2 border-indigo-500 shadow-lg shrink-0">
               <video 
                 ref={videoRef} 
                 autoPlay 
@@ -338,25 +338,23 @@ const TakeQuiz: React.FC = () => {
                 playsInline 
                 className="w-full h-full object-cover scale-x-[-1]"
               />
-              <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             </div>
-            <div>
-              <h1 className="text-xl font-black text-slate-900 truncate max-w-sm">{quiz.title}</h1>
-              <div className="flex items-center space-x-2 mt-1">
-                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Proctored Session</span>
-                <div className="w-1 h-1 bg-slate-300 rounded-full" />
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Warnings: {warningCount}/3</span>
+            <div className="min-w-0">
+              <h1 className="text-sm md:text-xl font-black text-slate-900 truncate max-w-[120px] md:max-w-sm">{quiz.title}</h1>
+              <div className="flex items-center space-x-2 mt-0.5">
+                <span className="text-[8px] md:text-[10px] font-black text-indigo-500 uppercase tracking-widest truncate">Live Session</span>
+                <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">W: {warningCount}/3</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-6">
-            <div className={`flex items-center space-x-3 px-6 py-3 rounded-2xl border-2 transition-colors ${timeLeft < 60 ? 'border-red-200 bg-red-50 text-red-600' : 'border-indigo-100 bg-indigo-50 text-indigo-600'}`}>
-              <Clock className="w-5 h-5 animate-pulse" />
-              <span className="font-mono text-xl font-black">{formatTime(timeLeft)}</span>
+          <div className="flex items-center space-x-3 md:space-x-6">
+            <div className={`flex items-center space-x-2 md:space-x-3 px-3 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 transition-colors ${timeLeft < 60 ? 'border-red-200 bg-red-50 text-red-600' : 'border-indigo-100 bg-indigo-50 text-indigo-600'}`}>
+              <Clock className="w-4 h-4 md:w-5 md:h-5 animate-pulse shrink-0" />
+              <span className="font-mono text-base md:text-xl font-black">{formatTime(timeLeft)}</span>
             </div>
             <button
               onClick={() => { if(window.confirm('Warning: Final submission cannot be undone. Proceed?')) handleSubmit(); }}
-              className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+              className="hidden sm:block bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
             >
               Finish Exam
             </button>
@@ -429,40 +427,40 @@ const TakeQuiz: React.FC = () => {
                   </div>
                 </div>
                 
-                <h2 className="text-3xl font-black text-slate-900 leading-tight mb-12">
+                <h2 className="text-xl md:text-3xl font-black text-slate-900 leading-tight mb-8 md:mb-12">
                   {currentQuestion.text}
                 </h2>
                 
-                <div className="grid grid-cols-1 gap-5">
+                <div className="grid grid-cols-1 gap-3 md:gap-5">
                   {currentQuestion.options.map((opt, i) => (
                     <button
                       key={i}
                       onClick={() => setAnswers({ ...answers, [currentQuestion.id]: i })}
-                      className={`flex items-center w-full p-6 rounded-[24px] border-2 transition-all text-left group ${
+                      className={`flex items-center w-full p-4 md:p-6 rounded-2xl md:rounded-[24px] border-2 transition-all text-left group ${
                         answers[currentQuestion.id] === i 
                         ? 'border-indigo-600 bg-indigo-50/50 shadow-lg shadow-indigo-100/50' 
                         : 'border-slate-50 hover:border-slate-200 bg-white/50 text-slate-600'
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black mr-6 shrink-0 transition-all ${
+                      <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center font-black mr-4 md:mr-6 shrink-0 transition-all ${
                         answers[currentQuestion.id] === i ? 'bg-indigo-600 text-white rotate-6' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'
                       }`}>
                         {String.fromCharCode(65 + i)}
                       </div>
-                      <span className="font-bold text-xl">{opt}</span>
+                      <span className="font-bold text-base md:text-xl">{opt}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Navigation Controls */}
-              <div className="mt-16 flex justify-between items-center pt-8 border-t border-slate-100/50">
+              <div className="mt-10 md:mt-16 flex justify-between items-center pt-6 md:pt-8 border-t border-slate-100/50">
                 <button
                   disabled={currentIdx === 0}
                   onClick={() => setCurrentIdx(prev => prev - 1)}
-                  className="flex items-center space-x-2 px-8 py-4 rounded-2xl font-black text-slate-400 disabled:opacity-0 hover:bg-slate-50 transition-all"
+                  className="flex items-center space-x-2 px-4 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-slate-400 disabled:opacity-0 hover:bg-slate-50 transition-all text-xs md:text-base"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                   <span>Previous</span>
                 </button>
 
@@ -474,10 +472,10 @@ const TakeQuiz: React.FC = () => {
                       if(window.confirm('Finish quiz and submit?')) handleSubmit();
                     }
                   }}
-                  className="flex items-center space-x-2 px-10 py-4 bg-slate-900 text-white rounded-[20px] font-black hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200"
+                  className="flex items-center space-x-2 px-6 md:px-10 py-3 md:py-4 bg-slate-900 text-white rounded-xl md:rounded-[20px] font-black hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 text-xs md:text-base"
                 >
                   <span>{currentIdx === quiz.questions.length - 1 ? 'Finish Exam' : 'Next Item'}</span>
-                  {currentIdx !== quiz.questions.length - 1 && <ChevronRight className="w-5 h-5" />}
+                  {currentIdx !== quiz.questions.length - 1 && <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />}
                 </button>
               </div>
             </motion.div>

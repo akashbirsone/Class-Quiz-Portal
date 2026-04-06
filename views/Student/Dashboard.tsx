@@ -137,10 +137,10 @@ const StudentDashboard: React.FC = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white rounded-[40px] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
             >
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="p-5 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-900">Examination History</h3>
-                  <p className="text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest mt-1">
+                  <h3 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Examination History</h3>
+                  <p className="text-slate-500 font-bold text-[9px] md:text-sm uppercase tracking-widest mt-1">
                     {selectedQuiz.title} • {new Date(selectedAttempt.timestamp).toLocaleDateString()}
                   </p>
                 </div>
@@ -152,7 +152,7 @@ const StudentDashboard: React.FC = () => {
                 </button>
               </div>
               
-              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-5 md:p-8 custom-scrollbar">
                 <AttemptReview quiz={selectedQuiz} attempt={selectedAttempt} />
               </div>
               
@@ -172,19 +172,19 @@ const StudentDashboard: React.FC = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Student Portal</h1>
-          <div className="flex items-center space-x-2 mt-1">
-            <p className="text-xs md:text-slate-500 font-medium">Session {user?.academicYear} • {user?.name}</p>
-            <span className="text-slate-300">•</span>
-            <Link to="/profile" className="text-xs text-indigo-600 hover:text-indigo-800 font-black uppercase tracking-widest">View Profile</Link>
+          <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Student Dashboard</h1>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+            <p className="text-xs text-slate-500 font-medium">Session {user?.academicYear} • {user?.name}</p>
+            <span className="hidden sm:inline text-slate-300">•</span>
+            <Link to="/profile" className="text-xs text-indigo-600 hover:text-indigo-800 font-black uppercase tracking-widest">Profile</Link>
           </div>
         </div>
         <button
           onClick={() => navigate('/student/scan')}
-          className="flex items-center space-x-3 px-8 py-4 bg-indigo-600 text-white rounded-[20px] font-black text-lg shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 active:scale-[0.98] transition-all"
+          className="w-full md:w-auto flex items-center justify-center space-x-3 px-8 py-4 bg-indigo-600 text-white rounded-[20px] font-black text-lg shadow-xl shadow-indigo-600/30 hover:bg-indigo-700 active:scale-[0.98] transition-all"
         >
           <QrCode className="w-6 h-6" />
-          <span>Scan to Join Exam</span>
+          <span>Scan QR</span>
         </button>
       </div>
 
@@ -208,37 +208,37 @@ const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex p-1.5 bg-slate-100/80 rounded-[20px] max-w-full overflow-x-auto no-scrollbar relative">
+      <div className="flex p-1 bg-slate-100/80 rounded-[18px] max-w-full overflow-x-auto no-scrollbar relative">
         <motion.div
-          className="absolute top-1.5 bottom-1.5 bg-white rounded-[16px] shadow-sm z-0"
+          className="absolute top-1 bottom-1 bg-white rounded-[14px] shadow-sm z-0"
           initial={false}
           animate={{
-            left: activeTab === 'exams' ? '6px' : activeTab === 'leaderboard' ? '25%' : activeTab === 'history' ? '50%' : '75%',
-            width: '25%'
+            left: activeTab === 'exams' ? '4px' : activeTab === 'leaderboard' ? '25%' : activeTab === 'history' ? '50%' : '75%',
+            width: '24.5%'
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
         <button
           onClick={() => setActiveTab('exams')}
-          className={`flex-1 min-w-[80px] py-3 rounded-[16px] text-[10px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'exams' ? 'text-indigo-600' : 'text-slate-400'}`}
+          className={`flex-1 min-w-[70px] py-3 rounded-[14px] text-[9px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'exams' ? 'text-indigo-600' : 'text-slate-400'}`}
         >
           Exams
         </button>
         <button
           onClick={() => setActiveTab('leaderboard')}
-          className={`flex-1 min-w-[80px] py-3 rounded-[16px] text-[10px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'leaderboard' ? 'text-indigo-600' : 'text-slate-400'}`}
+          className={`flex-1 min-w-[70px] py-3 rounded-[14px] text-[9px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'leaderboard' ? 'text-indigo-600' : 'text-slate-400'}`}
         >
           Rank
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex-1 min-w-[80px] py-3 rounded-[16px] text-[10px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'history' ? 'text-indigo-600' : 'text-slate-400'}`}
+          className={`flex-1 min-w-[70px] py-3 rounded-[14px] text-[9px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'history' ? 'text-indigo-600' : 'text-slate-400'}`}
         >
           History
         </button>
         <button
           onClick={() => setActiveTab('violations')}
-          className={`flex-1 min-w-[80px] py-3 rounded-[16px] text-[10px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'violations' ? 'text-red-600' : 'text-slate-400'}`}
+          className={`flex-1 min-w-[70px] py-3 rounded-[14px] text-[9px] md:text-xs font-black uppercase tracking-widest relative z-10 transition-colors ${activeTab === 'violations' ? 'text-red-600' : 'text-slate-400'}`}
         >
           Alerts
         </button>
