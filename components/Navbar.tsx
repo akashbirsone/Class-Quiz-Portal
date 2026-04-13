@@ -180,6 +180,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
 
   return (
     <>
+      <DatabaseStatus />
       {/* Top Navbar */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -204,9 +205,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
             </div>
 
             <div className="flex items-center space-x-6">
-              <div className="hidden md:block">
-                <DatabaseStatus />
-              </div>
               
               <Link 
                 to="/profile" 
@@ -399,9 +397,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               </div>
 
               <div className="p-6 border-t border-slate-100 bg-slate-50/50">
-                <div className="mb-6 flex justify-center">
-                  <DatabaseStatus />
-                </div>
                 <Link 
                   to="/profile" 
                   onClick={toggleSidebar}
