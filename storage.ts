@@ -191,5 +191,18 @@ export const Storage = {
     }).eq('id', userId);
   },
 
+  getSystemConfig: async (key: string): Promise<string | null> => {
+    const { data, error } = await supabase
+      .from('system_config')
+      .select('value')
+      .eq('key', key)
+      .single();
+    if (error) {
+      console.warn(`Config key ${key} not found in Supabase`, error.message);
+      return null;
+    }
+    return data?.value || null;
+  },
+
   clearAll: () => localStorage.clear()
 };

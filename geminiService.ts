@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, Type } from '@google/genai';
 import { Question, Difficulty } from "./types";
+import { Storage } from "./storage";
 
 export interface ContentPart {
   inlineData?: {
@@ -18,7 +19,16 @@ export const GeminiService = {
     onProgress?: (current: number, total: number) => void
   ): Promise<Question[]> {
     try {
-      const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (process.env as any).GEMINI_API_KEY || "AIzaSyD6E_pA_TrFXN0hHKVdnMQwgPTt70z6TUs";
+      let apiKey = await Storage.getSystemConfig('GEMINI_API_KEY');
+      
+      if (!apiKey) {
+        apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (process.env as any).GEMINI_API_KEY;
+      }
+
+      if (!apiKey) {
+        throw new Error("Gemini API Key not found in Supabase or Environment variables.");
+      }
+
       const ai = new GoogleGenAI({ apiKey });
       
       if (count > 20) count = 20;
