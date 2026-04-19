@@ -73,13 +73,19 @@ const Profile: React.FC = () => {
             }).sort((a, b) => b.avg - a.avg);
 
             const currentRank = leaderboard.findIndex(s => s.id === targetId) + 1;
-            setRank(currentRank > 0 ? currentRank : 'N/A');
             
-            if (leaderboard.length > 1) {
-              const perc = Math.round(((leaderboard.length - currentRank) / (leaderboard.length - 1)) * 100);
-              setPercentile(perc);
+            if (userAttempts.length === 0) {
+              setRank(0);
+              setPercentile(0);
             } else {
-              setPercentile(100);
+              setRank(currentRank > 0 ? currentRank : 'N/A');
+              
+              if (leaderboard.length > 1) {
+                const perc = Math.round(((leaderboard.length - currentRank) / (leaderboard.length - 1)) * 100);
+                setPercentile(perc);
+              } else {
+                setPercentile(100);
+              }
             }
           }
         }

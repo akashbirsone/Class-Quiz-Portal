@@ -1,0 +1,17 @@
+
+/* Base Styles */
+:root {
+  --primary: #6366f1;
+  --secondary: #94a3b8;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}

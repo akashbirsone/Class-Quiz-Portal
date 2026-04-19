@@ -86,6 +86,15 @@ const StudentDirectoryPage: React.FC = () => {
     setEditingStudent(null);
   };
 
+  const handleToggleBlockStatus = async (student: User) => {
+    const updatedUser = {
+      ...student,
+      isBlocked: !student.isBlocked
+    };
+    await Storage.saveUser(updatedUser);
+    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+  };
+
   return (
     <div className="space-y-8 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -248,6 +257,13 @@ const StudentDirectoryPage: React.FC = () => {
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => handleToggleBlockStatus(student)}
+                            className={`p-3 rounded-xl transition-all shadow-sm ${student.isBlocked ? 'bg-green-50 text-green-700 hover:bg-green-600 hover:text-white' : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white'}`}
+                            title={student.isBlocked ? "Unblock Student" : "Block Student"}
+                          >
+                            {student.isBlocked ? <UserCheck className="w-5 h-5" /> : <UserX className="w-5 h-5" />}
+                          </button>
                           <button
                             onClick={() => startEditing(student)}
                             className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm"

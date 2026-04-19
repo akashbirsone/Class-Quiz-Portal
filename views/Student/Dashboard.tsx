@@ -92,13 +92,19 @@ const StudentDashboard: React.FC = () => {
         setLeaderboard(entries);
 
         const currentRank = entries.findIndex(e => e.studentEmail === currentUser.email) + 1;
-        setRank(currentRank > 0 ? currentRank : 'N/A');
         
-        if (entries.length > 1 && currentRank > 0) {
-          const perc = Math.round(((entries.length - currentRank) / (entries.length - 1)) * 100);
-          setPercentile(perc);
-        } else if (entries.length === 1 && currentRank === 1) {
-          setPercentile(100);
+        if (allAttempts.length === 0) {
+          setRank(0);
+          setPercentile(0);
+        } else {
+          setRank(currentRank > 0 ? currentRank : 'N/A');
+          
+          if (entries.length > 1 && currentRank > 0) {
+            const perc = Math.round(((entries.length - currentRank) / (entries.length - 1)) * 100);
+            setPercentile(perc);
+          } else if (entries.length === 1 && currentRank === 1) {
+            setPercentile(100);
+          }
         }
       }
     };

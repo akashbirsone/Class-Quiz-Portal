@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, FileText, Calendar, Filter, Search, ChevronRight, BookOpen, Users, Activity, CheckCircle2, X } from 'lucide-react';
 import { Quiz, Attempt, User } from '../../types';
 import { Storage } from '../../storage';
+import { useFilter } from '../../context/FilterContext';
 import { ReportService } from '../../services/reportService';
 
 const ReportsPage: React.FC = () => {
@@ -11,14 +12,24 @@ const ReportsPage: React.FC = () => {
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const { selectedYear, selectedSemester, setSelectedYear, setSelectedSemester } = useFilter();
   
   // Filters
   const [reportFilters, setReportFilters] = useState({
-    academicYear: 'All Years',
-    semester: 'All Semesters',
+    academicYear: selectedYear,
+    semester: selectedSemester,
     quizId: 'All Exams',
     studentId: 'All Students'
   });
+
+  // Keep reportFilters in sync with global filters when they change
+  useEffect(() => {
+    setReportFilters(prev => ({
+      ...prev,
+      academicYear: selectedYear,
+      semester: selectedSemester
+    }));
+  }, [selectedYear, selectedSemester]);
 
   useEffect(() => {
     const loadData = async () => {

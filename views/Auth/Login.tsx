@@ -120,27 +120,20 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const user = users.find(u => u.email === loginData.email && u.role === 'student');
     
     if (user) {
-      if (user.password && user.password !== loginData.password) {
+      if (!loginData.password || user.password !== loginData.password) {
         setError('Incorrect password.');
+        setIsLoading(false);
+        return;
+      }
+      if (user.isBlocked) {
+        setError('Your account has been blocked by the administrator.');
         setIsLoading(false);
         return;
       }
       onLogin(user);
       navigate('/student');
-    } else if (loginData.email && loginData.password) {
-      const dummy: User = {
-        id: Math.random().toString(36).substring(2, 9),
-        name: loginData.email.split('@')[0],
-        email: loginData.email,
-        role: 'student',
-        academicYear: '2nd Year',
-        semester: 'Semester 3'
-      };
-      await Storage.saveUser(dummy);
-      onLogin(dummy);
-      navigate('/student');
     } else {
-      setError('Please enter valid credentials.');
+      setError('User not registered or invalid credentials.');
       setIsLoading(false);
     }
   };
