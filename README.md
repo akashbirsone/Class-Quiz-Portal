@@ -5,7 +5,7 @@ A modern and responsive quiz platform built with React and TypeScript, featuring
 ---
 
 ## 🚀 Live Demo
-🔗 [https://your-live-link.com](https://your-live-link.com)  
+🔗 https://class-quiz-portal-ruby.vercel.app/ 
 
 ---
 
@@ -36,3 +36,7 @@ A modern and responsive quiz platform built with React and TypeScript, featuring
 
 **AI Integration:**
 - Google Gemini API
+
+API_KEY=your_api_key_here
+SUPABASE_URL=your_url
+SUPABASE_ANON_KEY=your_key
